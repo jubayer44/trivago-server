@@ -20,6 +20,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const userCollection = client.db("UserInfo").collection("userEmail")
+        const citiesCollection = client.db("UserInfo").collection("allCities")
 
         app.get("/user", async (req, res) => {
             const email = req.query.email;
@@ -29,6 +30,7 @@ async function run() {
             }
             res.send(filter);
         })
+
         app.get("/loginPassword/:id", async (req, res) => {
             const userEmail = req.params.id;
             const result = await userCollection.findOne({email: userEmail});
@@ -43,12 +45,22 @@ async function run() {
             }
             const result = await userCollection.insertOne(email);
             res.send(result)
-        })
+        });
 
-        app.get("/users", async (req, res) => {
-            const result = await userCollection.find({}).toArray()
-            res.send(result);
-        })
+        app.get("/topCities", async (req, res) => {
+            const filter = await citiesCollection.find({status: "top-cities"}).toArray();
+            res.send(filter);
+        });
+        app.get("/topDestinations", async (req, res) => {
+            const filter = await citiesCollection.find({status: "destinations"}).toArray();
+            res.send(filter);
+        });
+
+        app.get("/city", async (req, res) => {
+            const city = req.query.city;
+            const filter = await citiesCollection.find({city: city.toLowerCase()}).toArray();
+            res.send(filter);
+        });
     }
     finally {
 
